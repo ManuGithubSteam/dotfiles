@@ -1,0 +1,42 @@
+
+Alacritty:
+
+Auf dem Host:
+
+pacman -S alacritty xdotool wmctrl xprop urlview
+yay -S alacritty-themes nerd-fonts-jetbrains-mono-160
+
+theme: ❯   Shapeshifter.dark
+
+Schrift im Terminal: JetBrainsMonoNL Nerd Font Mono
+
+nerd-fonts-jetbrains-mono-160
+
+Works:
+
+- Shift + Middle Click - Paste secondary buffer into tmux from X11
+- CTRL + Shift +V - pase primarty copy buffer into tmux from X11
+- Scrolling im tmux (not in Vim, wil mess up copy)
+- Copy and pase inside of tmux with middle mouse with different Windows and Panes
+- Mark text inside tmux with middle mouse -> Copy with CTRl+V into X11
+
+----
+
+Window Toggler for F12:
+
+for Linux: See Script (X11)
+
+MacOS: https://world.hey.com/jonash/alacritty-drop-down-guake-quake-style-terminal-setup-on-macos-6eef7d73
+
+-----
+
+Host und Clients:
+
+Tmux:
+
+Oh my tmux:
+
+cd
+ln -s -f .tmux/ohmytmux/.tmux.conf
+cp .tmux/ohmytmux/.tmux.conf.local .
+
