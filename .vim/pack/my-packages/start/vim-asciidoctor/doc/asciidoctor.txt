@@ -1,0 +1,462 @@
+*asciidoctor.txt*  Vim :heart: Asciidoctor
+
+Author:  Maxim Kim <https://habamax.github.io>
+URL:     https://github.com/habamax/vim-asciidoctor
+License: MIT
+
+
+INTRODUCTION                                                     *asciidoctor*
+
+
+Vim has syntax highlighting for asciidoc out of the box. And it is/was really
+slow for me, probably because it tries to be very smart about syntax.
+
+This plugin:
+
+    - has different syntax highlighting;
+    - is way faster (your vim lags less :) );
+    - has folding;
+    - has commands to compile documents (html, pdf, docx).
+
+
+SETTINGS                                                *asciidoctor-settings*
+
+It should work out of the box (at least it was the intention). But sometimes
+one needs settings to set.
+
+
+*g:asciidoctor_executable*            What to use for HTML.
+                                    Default: asciidoctor
+  Example: >
+
+  let g:asciidoctor_executable = '~/projects/asciidoctor/bin/asciidoctor'
+
+
+*g:asciidoctor_extensions*            What extensions to use with HTML.
+                                    Default: []
+  Example: >
+
+  let g:asciidoctor_extensions = ['asciidoctor-diagram', 'asciidoctor-rouge']
+
+
+*g:asciidoctor_css_path*              Path to custom CSS to use with HTML.
+                                    Default: ''
+  Example: >
+
+  let g:asciidoctor_css_path = '~/docs/ascidoctor-themes/'
+
+
+*g:asciidoctor_css*                   Custom CSS file name to use with HTML.
+                                    Default: ''
+  Example: >
+
+  let g:asciidoctor_css = 'mytheme.css'
+
+
+*g:asciidoctor_pdf_executable*        What to use for PDF.
+                                    Default: asciidoctor-pdf
+  Example: >
+
+  let g:asciidoctor_pdf_executable = '~/asciidoctor-pdf/bin/asciidoctor-pdf'
+
+
+*g:asciidoctor_use_fullpath*          Use full path when pass a file for a
+                                    compilation.
+                                    Default: v:true
+  Example: >
+
+  let g:asciidoctor_use_fullpath = v:false
+
+Might be useful if for some reason file passed for a compilation should not
+have full path. For example asciidoctor-pdf in docker might use the following
+setup to be able to create PDFs: >
+
+  let g:asciidoctor_pdf_executable = 'docker run --rm -v $(pwd):/documents/ asciidoctor/docker-asciidoctor asciidoctor-pdf'
+
+Note that you might need to have proper current working directory.
+Available for |:Asciidoctor2HTML| and |:Asciidoctor2PDF| commands only.
+
+
+*g:asciidoctor_pdf_extensions*        What extensions to use with PDF.
+                                    Default: []
+  Example: >
+
+  let g:asciidoctor_pdf_extensions = ['asciidoctor-diagram']
+
+
+*g:asciidoctor_pdf_themes_path*       Path to custom themes.
+                                    Default: ''
+  Example: >
+
+  let g:asciidoctor_pdf_themes_path = '~/docs/ascidoctor-themes/'
+
+
+*g:asciidoctor_pdf_fonts_path*        Path to fonts used in themes.
+                                    Default: ''
+  Example: >
+
+  let g:asciidoctor_pdf_fonts_path = '~/docs/fonts/'
+
+
+*g:asciidoctor_pandoc_executable*     What to use for DOCX. The process is to
+                                    convert ADOC to DOCBOOK with
+                                    |g:asciidoctor_executable| and then
+                                    DOCBOOK to DOCX with pandoc.
+                                    Default: 'pandoc'
+  Example: >
+
+  let g:asciidoctor_pandoc_executable = '~/bin/pandoc'
+
+
+*g:asciidoctor_pandoc_data_dir*       Set --data-dir for pandoc.
+                                    Default: ''
+  Example: >
+
+  let g:asciidoctor_pandoc_data_dir = '~/docs/.pandoc'
+
+
+*g:asciidoctor_pandoc_reference_doc*  Set --reference-doc for pandoc.
+                                    What docx file to use as a reference
+                                    document (use styles defined there)
+                                    Default: ''
+  Example: >
+
+  let g:asciidoctor_pandoc_referenc_doc = 'custom-reference.docx'
+
+
+*g:asciidoctor_pandoc_other_params*   Set additional parameteres for pandoc.
+                                    Default: ''
+  Example: >
+
+  let g:asciidoctor_pandoc_other_params = '--toc'
+
+
+*g:asciidoctor_folding*               Fold sections (headers).
+                                    Default: 0
+  Example: >
+
+  let g:asciidoctor_folding = 1
+
+if enabled all sections would be foldable. Title has the same fold level as
+sections level 1, higher level sections would have higher fold level (folded
+under section level-1): >
+
+ = Title
+ == Section 1
+ === Section 2
+ === Section 2
+ == Section 1
+
+When folded: >
+
+ = Title -----------------------------------
+ == Section 1 ------------------------------
+ == Section 1 ------------------------------
+
+
+*g:asciidoctor_foldnested*            Fold nested sections.
+                                    Default: 1
+  Example: >
+
+  let g:asciidoctor_foldnested = 0
+
+if disabled all sections would have the same foldlevel (=1) no matter what
+section level is.
+
+Then >
+
+ = Title
+ hello world
+ == Section 1
+ hello world
+ === Section 2
+ hello world
+ === Section 2
+ hello world
+ == Section 1
+ hello world
+
+Would be folded to: >
+
+ = Title -----------------------------------
+ == Section 1 ------------------------------
+ === Section 2 -----------------------------
+ === Section 2 -----------------------------
+ == Section 1 ------------------------------
+
+
+*g:asciidoctor_foldtitle_as_h1*       Fold title as level 1 sections.
+                                    Default: 1
+
+  Example: >
+
+  let g:asciidoctor_foldtitle_as_h1 = 0
+
+When on, following >
+
+ = Title
+ hello world
+ == Section 1
+ hello world
+ === Section 2
+ hello world
+
+would be folded to: >
+
+ = Title -----------------------------------
+ == Section 1 ------------------------------
+
+Otherwise to >
+
+ = Title -----------------------------------
+
+
+*g:asciidoctor_syntax_indented*       Enable highlight for indented blocks.
+                                    Default: 1
+  Example: >
+
+  let g:asciidoctor_syntax_indented = 0
+
+
+*g:asciidoctor_syntax_conceal*        Enable concealable syntax.
+                                    Currently only bold, italic, bolditaclic,
+                                    code and links are concealed.
+                                    Default: 0
+  Example: >
+
+  let g:asciidoctor_syntax_conceal = 1
+
+NOTE: It doesn't automatically set conceallevel.
+
+
+*g:asciidoctor_fold_options*          Fold options (usually under the title).
+                                    Default: 0
+  Example: >
+
+  let g:asciidoctor_fold_options = 1
+
+if enabled asciidoctor options would be foldable: >
+
+    = Title
+    :author: Maxim Kim
+    :experimental:
+    :toc: left
+    :toclevels: 3
+    :icons: font
+    :autofit-option:
+    :source-highlighter: rouge
+    :rouge-style: github
+    :source-linenums-option:
+    :revdate: 2018-11-19
+    :imagesdir: images
+
+When folded: >
+
+    = Title
+    :author: Maxim Kim ------------------------
+
+
+*g:asciidoctor_fenced_languages*      Highlight syntax of source blocks
+                                    Default: []
+  Example: >
+
+  let g:asciidoctor_fenced_languages = ['python', 'c', 'javascript']
+
+Then in your asciidoctor document: >
+
+  [source,python]
+  ----
+  def hello():
+      print("hello world")
+  ----
+
+should be highlighted with python syntax.
+
+
+*g:asciidoctor_img_paste_command*     Command to save clipboard image to a
+                                    file.
+                                    Default: 'gm convert clipboard: %s%s'
+                                    Where first %s is a path, second %s is an
+                                    image file name.
+  Example: >
+
+  " for OSX
+  let g:asciidoctor_img_paste_command = 'pngpaste %s%s'
+
+  " for linux
+  let g:asciidoctor_img_paste_command = 'xclip -selection clipboard -t image/png -o > %s%s'
+
+
+*g:asciidoctor_img_paste_pattern*     Pattern of the saved clipboard image file.
+                                    Default: 'img_%s_%s.png'
+                                    Where first %s is a document base name,
+                                    second %s is an image number.
+  Example: >
+
+  let g:asciidoctor_img_paste_pattern = '%s_img_%s.png'
+
+So if you edit 'README.adoc` document and paste a clipboard image there it
+would have name 'README_img_1.png'. Next one would have name
+'README_img_2.png' etc.
+
+
+*g:asciidoctor_opener*                Shell command to open asciidoctor files.
+                                    Used in |:AsciidoctorOpenRAW|,
+                                    |:AsciidoctorOpenPDF|,
+                                    |:AsciidoctorOpenHTML| and
+                                    |:AsciidoctorOpenDOCX| commands.
+                                    Default Windows: ':!start'
+                                    Default Linux:   ':!xdg-open'
+                                    Default OSX:     ':!open'
+  Example: >
+
+  let g:asciidoctor_opener = ':!firefox'
+
+
+
+
+COMMANDS                                                *asciidoctor-commands*
+
+These commands are local to the asciidoctor buffers.
+
+
+                                                           *:Asciidoctor2HTML*
+:Asciidoctor2HTML          Convert current file to HTML.
+                           Uses |g:asciidoctor_executable|.
+
+
+                                                            *:Asciidoctor2PDF*
+:Asciidoctor2PDF           Convert current file to PDF.
+                           Uses |g:asciidoctor_pdf_executable|.
+
+
+                                                           *:Asciidoctor2DOCX*
+:Asciidoctor2DOCX          Convert current file to DOCX.
+                           Uses combination of |g:asciidoctor_executable| to
+                           generate docbook file and
+                           |g:asciidoctor_pandoc_executable| to generate
+                           result DOCX file.
+
+
+                                                         *:AsciidoctorOpenRAW*
+:AsciidoctorOpenRAW        Open current file in Web browser. Chrome and
+                           Firefox have extension to render barebone .adoc
+                           files. Uses |g:asciidoctor_opener|.
+
+
+                                                        *:AsciidoctorOpenHTML*
+:AsciidoctorOpenHTML       Open HTML file of the current file. It should exist
+                           (created first with |:Asciidoctor2HTML| command).
+                           Uses |g:asciidoctor_opener|.
+
+
+                                                         *:AsciidoctorOpenPDF*
+:AsciidoctorOpenPDF        Open PDF file of the current file. It should exist
+                           (created first with |:Asciidoctor2PDF| command).
+                           Uses |g:asciidoctor_opener|.
+
+
+                                                        *:AsciidoctorOpenDOCX*
+:AsciidoctorOpenDOCX       Open DOCX file of the current file. It should exist
+                           (created first with |:Asciidoctor2DOCX| command).
+                           Uses |g:asciidoctor_opener|.
+
+
+                                                      *:AsciidoctorPasteImage*
+:AsciidoctorPasteImage     "Paste" image from clipboard into buffer.
+                           1. Image file name is generated according to
+                           |g:asciidoctor_img_paste_pattern|.
+                           2. Clipboard image is saved in :imagesdir:
+                           directory (asciidoctor option defined in a
+                           document) or in the directory of the buffer.
+                           3. Image file name is inserted into the buffer.
+                           4. External dependency should be set up, see
+                           |g:asciidoctor_img_paste_command|.
+
+
+
+MAPPINGS                                                *asciidoctor-mappings*
+
+*<Plug>(AsciidoctorFold)*    Fold sections in a special way.
+
+If
+* no count is provided, toggle current fold;
+* count is n, open folds up to foldlevel n.
+
+
+*<Plug>(AsciidoctorPromoteSection)*    Promote section including subsections.
+
+This >
+
+  = Title
+  [cursor]
+  == Section 1
+  === Section 2
+  == Section 3
+
+Would become >
+
+  == Title
+  [cursor]
+  === Section 1
+  ==== Section 2
+  === Section 3
+
+*<Plug>(AsciidoctorDemoteSection)*     Demote section including subsections.
+
+This >
+
+  == Title
+  [cursor]
+  === Section 1
+  ==== Section 2
+  === Section 3
+
+Would become >
+
+  = Title
+  [cursor]
+  == Section 1
+  === Section 2
+  == Section 3
+
+
+
+DEFAULT MAPPINGS
+
+There are no default mappings. You can setup yours with: >
+
+
+    " Function to create buffer local mappings
+    fun! AsciidoctorMappings()
+        nnoremap <buffer> <leader>oo :AsciidoctorOpenRAW<CR>
+        nnoremap <buffer> <leader>op :AsciidoctorOpenPDF<CR>
+        nnoremap <buffer> <leader>oh :AsciidoctorOpenHTML<CR>
+        nnoremap <buffer> <leader>ox :AsciidoctorOpenDOCX<CR>
+        nnoremap <buffer> <leader>ch :Asciidoctor2HTML<CR>
+        nnoremap <buffer> <leader>cp :Asciidoctor2PDF<CR>
+        nnoremap <buffer> <leader>cx :Asciidoctor2DOCX<CR>
+        nmap <buffer> <space><tab> <Plug>(AsciidoctorFold)
+    endfun
+
+    " Call AsciidoctorMappings for all `*.adoc` and `*.asciidoc` files
+    augroup asciidoctor
+        au!
+        au BufEnter *.adoc,*.asciidoc call AsciidoctorMappings()
+    augroup END
+
+
+BIBLIOGRAPHY COMPLETION                               *asciidoctor-completion*
+
+There is initial support for bibtex citation added.
+
+Usage:
+
+Place your bibtex files next to your asciidoctor file (to the same path). Then
+completion would be available for: >
+
+  cite:[cit<C-X><C-U>
+  citenp:[cit<C-X><C-U>
+
+
+ vim:tw=78:et:ft=help:norl:
